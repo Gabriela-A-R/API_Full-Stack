@@ -46,6 +46,23 @@ def getid_users(id_user):
         if user["id_user"] == id_user:
             return jsonify(user)
 
+@app.route('/users/<int:id_user>', methods=['PUT'])
+def atualizar_users(id_user):
+    dados = request.json
+    for user in usuarios["user"]:
+        if user["id_user"] == id_user:
+            user['nome'] = dados.get('nome', user['nome'])
+            user['email'] = dados.get('email', user['email'])
+            return jsonify(user), 200
+
+
+@app.route('/users/<int:id_user>', methods=['DELETE'])
+def delete_users(id_user):
+    users = usuarios['user']
+    for user in users:
+        if user['id_user'] == id_user:
+            users.remove(user)
+            return jsonify({"mensagem": "Deletado"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
