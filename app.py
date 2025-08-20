@@ -5,7 +5,7 @@ usuarios = {
         'nome': "Ana", 
         'email': "ana@gmail.com", 
         'id_user': 1
-        }]
+    }]
 }
 
 def novoID():
@@ -21,17 +21,23 @@ def novoID():
 app = Flask(__name__)
 
 
-
 @app.route('/users', methods=['POST'])
 def create_user():
     dados = request.json
+    dici_usuarios = usuarios["user"]
+
+    for user in dici_usuarios:
+        if user["id_user"] == dados["id_user"]:
+            return jsonify({"erro": "ID já existe."}), 400
+        
     usuario = {
+        "id_user": novoID(),
         "nome": dados["nome"],
-        "email": dados["email"],
-        "id_user": novoID()
+        "email": dados["email"]
     }
-    usuarios['user'].append(usuario)
-    return jsonify(usuario), 200
+
+    usuarios["user"].append(usuario)
+    return jsonify(usuario), 201
 
 
 @app.route('/users', methods=['GET'])
@@ -45,26 +51,33 @@ def getid_users(id_user):
     for user in usuarios["user"]:
         if user["id_user"] == id_user:
             return jsonify(user)
+    return jsonify({"erro": "Usuário não encontrado!"}), 404
+
 
 @app.route('/users/<int:id_user>', methods=['PUT'])
 def atualizar_users(id_user):
-    dados = request.json
-    for user in usuarios["user"]:
+    dici_usuarios = usuarios["user"]
+    
+    for user in dici_usuarios:
         if user["id_user"] == id_user:
-            user['nome'] = dados.get('nome', user['nome'])
-            user['email'] = dados.get('email', user['email'])
-            return jsonify(user), 200
+            dadosUser = request.json
+            user["nome"] = dadosUser["nome"]
+            user["email"] = dadosUser["email"]
+            return jsonify(user)
+    
+    return jsonify({"erro": "Usuário não encontrado"}), 404
 
 
 @app.route('/users/<int:id_user>', methods=['DELETE'])
 def delete_users(id_user):
-    users = usuarios['user']
-    for user in users:
-        if user['id_user'] == id_user:
-            users.remove(user)
-            return jsonify({"mensagem": "Deletado"}), 200
+    dici_usuarios = usuarios["user"]
+    for user in dici_usuarios:
+        if user["id_user"] == id_user:
+            dici_usuarios.remove(user)
+            return jsonify({"mensagem": "Usuário deletado com sucesso!"}), 200
+    
+    return jsonify({"erro": "Usuário não encontrado."}), 404
+
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-    
